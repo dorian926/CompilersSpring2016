@@ -1,0 +1,17 @@
+/**
+ * COMP 520
+ * Type Checking
+ */
+class Pass322 {         
+    public static void main(String[] args) {
+        Pass322 a = new Pass322();
+        boolean c = a && a.p() == 5;   
+        boolean c = 4 == true;                     
+    }
+        
+    int p() {
+	return 5 ;
+    }
+     
+}
+

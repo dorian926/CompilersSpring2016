@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="miniJava.SyntacticAnalyzer.SourceFile"/>
+<fullyQualifiedTypeName name="miniJava.SyntacticAnalyzer.Parser2"/>
+<fullyQualifiedTypeName name="java.util.Stack"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.AST"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.ThisRef"/>
+<fullyQualifiedTypeName name="java.awt.List"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.Statement"/>
+<fullyQualifiedTypeName name="miniJava.ContextualAnalyzer.MemberIdentify"/>
+<fullyQualifiedTypeName name="miniJava.ContextualAnalyzer.Helper"/>
+<fullyQualifiedTypeName name="miniJava.ContextualAnalyzer.Checker"/>
+<fullyQualifiedTypeName name="miniJava.ContextualAnalyzer.ReplaceReference"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.Identifier"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.Declaration"/>
+<fullyQualifiedTypeName name="miniJava.Compiler"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.ReturnStmt"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.BaseType"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="miniJava.SyntacticAnalyzer.Token"/>
+<fullyQualifiedTypeName name="miniJava.SyntacticAnalyzer.TokenKind"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.TypeKind"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.Visitor"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="mJAM.Machine"/>
+<fullyQualifiedTypeName name="mJAM.Machine.Reg"/>
+<fullyQualifiedTypeName name="miniJava.CodeGenerator.ClassRuntimeEntity"/>
+<fullyQualifiedTypeName name="miniJava.CodeGenerator.FieldRuntimeEntity"/>
+<fullyQualifiedTypeName name="miniJava.CodeGenerator.MethodRuntimeEntity"/>
+<fullyQualifiedTypeName name="miniJava.CodeGenerator.LocalRuntimeEntity"/>
+<fullyQualifiedTypeName name="miniJava.ContextualAnalyzer.IdentificationTable"/>
+<fullyQualifiedTypeName name="miniJava.ErrorReporter"/>
+<fullyQualifiedTypeName name="miniJava.SyntacticAnalyzer.SourcePosition"/>
+<fullyQualifiedTypeName name="miniJava.AbstractSyntaxTrees.Package"/>
+<fullyQualifiedTypeName name="mJAM.ObjectFile"/>
+<fullyQualifiedTypeName name="mJAM.Interpreter"/>
+<fullyQualifiedTypeName name="mJAM.Disassembler"/>
+<fullyQualifiedTypeName name="mJAM.Machine.Op"/>
+<fullyQualifiedTypeName name="mJAM.Machine.Prim"/>
+<fullyQualifiedTypeName name="miniJava.CodeGenerator.CodeGeneration"/>
+<fullyQualifiedTypeName name="miniJava.CodeGenerator.RuntimeEntity"/>
+</qualifiedTypeNameHistroy>

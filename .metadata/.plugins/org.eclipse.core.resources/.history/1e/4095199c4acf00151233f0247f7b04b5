@@ -1,0 +1,398 @@
+package miniJava.SyntacticAnalyzer;
+
+import miniJava.SyntacticAnalyzer.Scanner;
+import miniJava.SyntacticAnalyzer.TokenKind;
+import miniJava.ErrorReporter;
+
+
+public class Parser {
+	private Scanner scanner;
+	private ErrorReporter reporter;
+	private Token token;
+	private boolean trace = true;
+	public Parser(Scanner scanner, ErrorReporter reporter) {
+		this.scanner = scanner;
+		this.reporter = reporter;
+	}
+	
+	/**
+	 * SyntaxError is used to unwind parse stack when parse fails
+	 *
+	 */
+	class SyntaxError extends Error {
+		private static final long serialVersionUID = 1L;	
+	}
+
+	/**
+	 * start parse
+	 */
+	public void parse() {
+		token = scanner.scan();
+		try {
+			while(token.kind == TokenKind.CLASS)
+				parseClass();
+			accept(TokenKind.EOT);
+		}
+		catch (SyntaxError e) { }
+		
+	}
+	
+	private void parseClass() throws SyntaxError {
+		accept(TokenKind.CLASS);
+		accept(TokenKind.ID);
+		accept(TokenKind.LCBRACK);
+		while(token.kind == TokenKind.PRIVATE || token.kind == TokenKind.PUBLIC || 
+				token.kind == TokenKind.STATIC || token.kind == TokenKind.INT ||
+				token.kind == TokenKind.ID || token.kind == TokenKind.BOOLEAN ||
+				token.kind == TokenKind.VOID)
+			parseBody();
+		accept(TokenKind.RCBRACK);
+	}
+	
+	private void parseBody() throws SyntaxError {
+		if((token.kind == TokenKind.PRIVATE) || (token.kind == TokenKind.PUBLIC)) {
+			acceptIt();
+		}
+		if(token.kind == TokenKind.STATIC) {
+			acceptIt();
+		}
+		
+		switch (token.kind) {
+	
+		case INT: case ID: case BOOLEAN:
+			parseType();
+			accept(TokenKind.ID);
+			switch(token.kind) {
+			
+			case SEMIC:
+				acceptIt();
+				return;
+			case LPAREN:
+				acceptIt();
+				parseParam();
+				accept(TokenKind.LCBRACK);
+				while(token.kind == TokenKind.LBRACK || token.kind == TokenKind.INT ||
+						token.kind == TokenKind.BOOLEAN || token.kind == TokenKind.ID ||
+						token.kind == TokenKind.THIS || token.kind == TokenKind.RETURN ||
+						token.kind == TokenKind.IF || token.kind == TokenKind.WHILE ||
+						token.kind == TokenKind.LCBRACK) {
+					parseState();
+				}
+				accept(TokenKind.RCBRACK);
+				return;
+			default:
+				parseError("Ivalid Term - expecting COMMA | LPAREN but found " + token.kind);
+			}
+		case VOID:
+			acceptIt();
+			accept(TokenKind.ID);
+			accept(TokenKind.LPAREN);
+			parseParam();
+			accept(TokenKind.LCBRACK);
+			while(token.kind == TokenKind.LBRACK || token.kind == TokenKind.INT ||
+					token.kind == TokenKind.BOOLEAN || token.kind == TokenKind.ID ||
+					token.kind == TokenKind.THIS || token.kind == TokenKind.RETURN ||
+					token.kind == TokenKind.IF || token.kind == TokenKind.WHILE ||
+					token.kind == TokenKind.LCBRACK) {
+				parseState();
+			}
+			accept(TokenKind.RCBRACK);
+			return;
+			
+		default:
+			parseError("Ivalid Term - expecting INT|ID|BOOLEAN|VOID but found " + token.kind);
+		}
+	}
+	
+	private void parseType() {
+		switch(token.kind) {
+		
+		case ID:
+			acceptIt();
+			if(token.kind == TokenKind.LBRACK) {
+				acceptIt();
+				if(token.kind == TokenKind.RBRACK) {
+					accept(TokenKind.RBRACK);
+				} else if(isOperator() || token.kind == TokenKind.THIS || token.kind == TokenKind.ID ||
+						token.kind == TokenKind.NUM || token.kind == TokenKind.TRUE ||
+						token.kind == TokenKind.FALSE || token.kind == TokenKind.LPAREN ||
+						token.kind == TokenKind.NEW) {
+					parseExpres();
+					accept(TokenKind.RBRACK);
+				}
+			} else if(token.kind == TokenKind.PERIOD /*|| token.kind == TokenKind.ASSIGN*/) {
+				parseRefer();
+			} else if(token.kind == TokenKind.LPAREN) {
+				acceptIt();
+				if(token.kind == TokenKind.ID)
+					parseParam();
+				else if (isOperator() || token.kind == TokenKind.THIS || token.kind == TokenKind.ID ||
+					token.kind == TokenKind.NUM || token.kind == TokenKind.TRUE ||
+					token.kind == TokenKind.FALSE || token.kind == TokenKind.LPAREN ||
+					token.kind == TokenKind.NEW)
+					while(isOperator() || token.kind == TokenKind.THIS || token.kind == TokenKind.ID ||
+							token.kind == TokenKind.NUM || token.kind == TokenKind.TRUE ||
+							token.kind == TokenKind.FALSE || token.kind == TokenKind.LPAREN ||
+							token.kind == TokenKind.NEW)
+							parseArgList();
+					accept(TokenKind.RPAREN);	
+			} else if(isOperator()) {
+				acceptIt();
+				parseExpres();
+			}
+			return;
+		case INT: 
+			acceptIt();
+			if(token.kind == TokenKind.LBRACK) {
+				acceptIt();
+				accept(TokenKind.RBRACK);
+			} else if(isOperator()) {
+				acceptIt();
+//				parseExpres();
+			}
+			return;
+		case BOOLEAN:
+			acceptIt();
+			return;
+		
+		default:
+			parseError("Ivalid Term - expecting INT|ID|BOOLEAN but found " + token.kind);
+		}
+	}
+	
+	private void parseParam() {
+		if(token.kind == TokenKind.INT || token.kind == TokenKind.ID || token.kind == TokenKind.BOOLEAN)
+		{
+			parseType();
+			accept(TokenKind.ID);
+			while(token.kind == TokenKind.COMMA) {
+				acceptIt();
+				parseType();
+				accept(TokenKind.ID);
+			}
+		}
+		accept(TokenKind.RPAREN);
+	}
+	private void parseState() {
+		//here
+		switch(token.kind) {
+		
+		case LCBRACK:
+			acceptIt();
+			while(token.kind == TokenKind.LBRACK || token.kind == TokenKind.INT ||
+					token.kind == TokenKind.BOOLEAN || token.kind == TokenKind.ID ||
+					token.kind == TokenKind.THIS || token.kind == TokenKind.RETURN ||
+					token.kind == TokenKind.IF || token.kind == TokenKind.WHILE ||
+					token.kind == TokenKind.LCBRACK) {
+				parseState();
+			}
+			accept(TokenKind.RCBRACK);
+			return;
+			
+		case INT: case ID: case NUM: case BOOLEAN:
+			parseType();
+			if(token.kind == TokenKind.ID)
+				accept(TokenKind.ID);
+			if(token.kind == TokenKind.ASSIGN)
+				accept(TokenKind.ASSIGN);
+			while(isOperator() || token.kind == TokenKind.THIS || token.kind == TokenKind.ID ||
+					token.kind == TokenKind.NUM || token.kind == TokenKind.TRUE ||
+					token.kind == TokenKind.FALSE || token.kind == TokenKind.LPAREN ||
+					token.kind == TokenKind.NEW) {
+				parseArgList();
+			}
+			accept(TokenKind.SEMIC);
+			return;
+			
+		case THIS:
+			parseRefer();
+			accept(TokenKind.ASSIGN);
+			parseExpres();
+			accept(TokenKind.SEMIC);
+			return;
+			
+		case RETURN:
+			acceptIt();
+			parseExpres();
+			accept(TokenKind.SEMIC);
+			return;
+			
+		case IF:
+			acceptIt();
+			accept(TokenKind.LPAREN);
+			while(isOperator() || token.kind == TokenKind.THIS || token.kind == TokenKind.ID ||
+					token.kind == TokenKind.NUM || token.kind == TokenKind.TRUE ||
+					token.kind == TokenKind.FALSE || token.kind == TokenKind.LPAREN ||
+					token.kind == TokenKind.NEW) {
+				parseExpres();
+			}
+			accept(TokenKind.RPAREN);
+			parseState();
+			if(token.kind == TokenKind.ELSE) {
+				acceptIt();
+				parseState();
+			}
+			return;
+			
+		case WHILE:
+			acceptIt();
+			accept(TokenKind.LPAREN);
+			while(isOperator() || token.kind == TokenKind.THIS || token.kind == TokenKind.ID ||
+					token.kind == TokenKind.NUM || token.kind == TokenKind.TRUE ||
+					token.kind == TokenKind.FALSE || token.kind == TokenKind.LPAREN ||
+					token.kind == TokenKind.NEW) {
+				parseExpres();
+			}
+			accept(TokenKind.RPAREN);
+			parseState();
+			return;
+		}
+	}
+	
+	private void parseRefer() {
+		switch(token.kind) {
+		
+//		case ASSIGN:
+//			acceptIt();
+//			parseExpres();
+//			return;
+		
+		case PERIOD:
+			acceptIt();
+			parseType();
+			return;
+			
+		case THIS:
+			acceptIt();
+			accept(TokenKind.PERIOD);
+			parseType();
+			return;
+			
+		default:
+			parseError("Ivalid Term - expecting THIS|ID|PERIOD but found " + token.kind);
+		}
+			
+	}
+	
+	private void parseExpres() {
+		switch(token.kind) {
+		
+		case INT: case ID:
+			parseType();
+			return;
+			
+		case NOT: case MINUS:
+			acceptIt();
+			parseExpres();
+			return;
+			
+		case LPAREN:
+			acceptIt();
+			parseArgList();
+			accept(TokenKind.RPAREN);
+			return;
+		
+		case NUM: case TRUE: case FALSE:
+			acceptIt();
+			if(isOperator()) {
+				acceptIt();
+			}
+			return;
+		
+		case NEW:
+			acceptIt();
+			switch(token.kind) {
+			
+			case ID:
+				acceptIt();
+				if(token.kind == TokenKind.LPAREN) {
+					acceptIt();
+					accept(TokenKind.RPAREN);
+				} else if(token.kind == TokenKind.LBRACK) {
+					acceptIt();
+					parseExpres();
+					accept(TokenKind.RBRACK);
+				}
+				return;
+				
+			case INT:
+				acceptIt();
+				if(token.kind == TokenKind.LBRACK) {
+					acceptIt();
+					parseExpres();
+					accept(TokenKind.RBRACK);
+				}
+				return;
+			}
+			
+		}
+		if(isOperator()) {
+			acceptIt();
+			parseExpres();
+			return;
+		}
+		return;
+	}
+	
+	private void parseArgList() {
+		while(isOperator() || token.kind == TokenKind.THIS || token.kind == TokenKind.ID ||
+				token.kind == TokenKind.NUM || token.kind == TokenKind.TRUE ||
+				token.kind == TokenKind.FALSE || token.kind == TokenKind.LPAREN ||
+				token.kind == TokenKind.NEW) {
+			parseExpres();
+			if(token.kind == TokenKind.COMMA) {
+				acceptIt();
+			}
+		}
+		return;
+	}
+	private boolean isOperator() {
+		return (token.kind == TokenKind.GREATER || token.kind == TokenKind.LESS || 
+				token.kind == TokenKind.EQUALS || token.kind == TokenKind.LEQUALS ||
+				token.kind == TokenKind.GEQUALS || token.kind == TokenKind.NEQUALS ||
+				token.kind == TokenKind.AND || token.kind == TokenKind.OR ||
+				token.kind == TokenKind.NOT || token.kind == TokenKind.PLUS ||
+				token.kind == TokenKind.MINUS || token.kind == TokenKind.TIMES ||
+				token.kind == TokenKind.DIVIDE);
+	}
+	private void acceptIt() throws SyntaxError {
+		accept(token.kind);
+	}
+
+	/**
+	 * verify that current token in input matches expected token and advance to next token
+	 * @param expectedToken
+	 * @throws SyntaxError  if match fails
+	 */
+	private void accept(TokenKind expectedTokenKind) throws SyntaxError {
+		if (token.kind == expectedTokenKind) {
+			if (trace)
+				pTrace();
+			token = scanner.scan();
+		}
+		else
+			parseError("expecting '" + expectedTokenKind +
+					"' but found '" + token.kind + "'");
+	}
+
+	/**
+	 * report parse error and unwind call stack to start of parse
+	 * @param e  string with error detail
+	 * @throws SyntaxError
+	 */
+	private void parseError(String e) throws SyntaxError {
+		reporter.reportError("Parse error: " + e);
+		throw new SyntaxError();
+	}
+
+	// show parse stack whenever terminal is  accepted
+	private void pTrace() {
+		StackTraceElement [] stl = Thread.currentThread().getStackTrace();
+		for (int i = stl.length - 1; i > 0 ; i--) {
+			if(stl[i].toString().contains("parse"))
+				System.out.println(stl[i]);
+		}
+		System.out.println("accepting: " + token.kind + " (\"" + token.spelling + "\")");
+		System.out.println();
+	}
+}

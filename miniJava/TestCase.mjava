@@ -1,0 +1,16 @@
+// PA1 parse assign pass
+class Test {
+	int f;
+	int tree() {
+		return 5;
+	}
+    void p(int a) {
+    int v = 0;
+	this.p(2,3);
+	a.v = 4;
+	f = 5;
+	return;
+    }
+    
+}
+
